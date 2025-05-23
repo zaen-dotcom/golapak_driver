@@ -6,6 +6,7 @@ import '../components/text_field.dart';
 import '../theme/colors.dart';
 import '../components/alertdialog.dart';
 import '../services/auth_service.dart';
+import '../utils/token_manager.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -23,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _showCustomAlert(String title, String message) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder:
           (context) => CustomAlert(
             title: title,
@@ -33,31 +35,51 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _handleLogin() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
+void _handleLogin() async {
+  if (_isLoading) return;
 
-    if (email.isEmpty || password.isEmpty) {
-      _showCustomAlert(
-        "Validasi Gagal",
-        "Email dan Password tidak boleh kosong.",
-      );
-      return;
-    }
+  setState(() => _isLoading = true);
 
-    setState(() => _isLoading = true);
+  final email = _emailController.text.trim();
+  final password = _passwordController.text;
 
-    final result = await loginKurir(email, password);
-
+  if (email.isEmpty || password.isEmpty) {
     setState(() => _isLoading = false);
-
-    if (result['success']) {
-      // Navigasi ke halaman utama jika login berhasil
-      Navigator.pushReplacementNamed(context, '/main');
-    } else {
-      _showCustomAlert("Login Gagal", result['message']);
-    }
+    _showCustomAlert("Gagal", "Email dan Password tidak boleh kosong.");
+    return;
   }
+
+  debugPrint("Memulai proses login...");
+  debugPrint("Email: $email");
+  debugPrint("Password: ${'*' * password.length}");
+
+  final response = await loginKurir(email, password);
+
+  debugPrint("Response dari login API: $response");
+
+  setState(() => _isLoading = false);
+
+  if (response['success'] == true) {
+    final token = response['access_token'];
+    debugPrint("Status sukses. Token: $token");
+
+    if (token != null && token is String) {
+      await TokenManager.saveToken(token);
+      debugPrint("Token berhasil disimpan.");
+      Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
+    } else {
+      debugPrint("Token tidak ditemukan dalam respons.");
+      _showCustomAlert("Gagal", "Token tidak ditemukan.");
+    }
+  } else {
+    debugPrint("Login gagal: ${response['message']}");
+    _showCustomAlert(
+      "Login Gagal",
+      response['message'] ?? "Terjadi kesalahan.",
+    );
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {

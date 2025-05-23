@@ -1,23 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import '../screens/indelivery_screen.dart';
 import '../screens/inorder_screen.dart';
 import '../screens/profile_screen.dart';
 
 class MainNavigation extends StatefulWidget {
-  const MainNavigation({Key? key}) : super(key: key);
+  final int initialIndex; // tambah ini
+
+  const MainNavigation({Key? key, this.initialIndex = 0}) : super(key: key);
 
   @override
   State<MainNavigation> createState() => _MainNavigationState();
 }
 
 class _MainNavigationState extends State<MainNavigation> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
 
   final List<Widget> _screens = const [
     InOrderScreen(),
     InDeliveryScreen(),
     ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   void _onItemTapped(int index) {
     if (_selectedIndex != index) {
@@ -42,22 +51,17 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        transitionBuilder: (child, animation) {
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0.0, 0.1),
-              end: Offset.zero,
-            ).animate(animation),
-            child: FadeTransition(opacity: animation, child: child),
+      body: PageTransitionSwitcher(
+        duration: const Duration(milliseconds: 350),
+        reverse: false,
+        transitionBuilder: (child, animation, secondaryAnimation) {
+          return FadeThroughTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            child: child,
           );
         },
-        child: IndexedStack(
-          key: ValueKey<int>(_selectedIndex),
-          index: _selectedIndex,
-          children: _screens,
-        ),
+        child: _screens[_selectedIndex],
       ),
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
