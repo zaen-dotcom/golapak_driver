@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../components/button.dart';
 import '../components/text_field.dart';
 import '../theme/colors.dart';
+import '../components/alertdialog.dart';
+import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -16,6 +18,47 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  bool _isLoading = false;
+
+  void _showCustomAlert(String title, String message) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => CustomAlert(
+            title: title,
+            message: message,
+            confirmText: 'OK',
+            onConfirm: () => Navigator.of(context).pop(),
+          ),
+    );
+  }
+
+  void _handleLogin() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      _showCustomAlert(
+        "Validasi Gagal",
+        "Email dan Password tidak boleh kosong.",
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final result = await loginKurir(email, password);
+
+    setState(() => _isLoading = false);
+
+    if (result['success']) {
+      // Navigasi ke halaman utama jika login berhasil
+      Navigator.pushReplacementNamed(context, '/main');
+    } else {
+      _showCustomAlert("Login Gagal", result['message']);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,7 +66,6 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header
             Container(
               height: 200,
               decoration: const BoxDecoration(
@@ -54,9 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
             ),
-
             const SizedBox(height: 30),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
@@ -81,12 +121,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         context,
                       ).textTheme.bodySmall!.copyWith(color: Colors.black87),
                       children: [
-                        TextSpan(
+                        const TextSpan(
                           text: 'Ada kendala login? ',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.black87,
-                          ),
+                          style: TextStyle(fontSize: 12, color: Colors.black87),
                         ),
                         TextSpan(
                           text: 'Hubungi Admin',
@@ -106,10 +143,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 20),
                   CustomButton(
                     text: "LOG IN",
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/main');
-                    },
-                    isLoading: false,
+                    onPressed: _handleLogin,
+                    isLoading: _isLoading,
                   ),
                 ],
               ),
