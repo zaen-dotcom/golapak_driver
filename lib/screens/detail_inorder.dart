@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import '../components/box_container.dart';
 import '../components/button.dart';
 import '../providers/shipping_detail_provider.dart';
+import '../providers/shipping_accept.dart';
 import '../theme/colors.dart';
+import '../components/alertdialog.dart';
 
 class DetailInOrderScreen extends StatefulWidget {
   final int transactionId;
@@ -144,6 +146,30 @@ class _DetailInOrderScreenState extends State<DetailInOrderScreen> {
     ],
   );
 
+  void _showCustomAlert({
+    required String title,
+    required String message,
+    required String confirmText,
+    required VoidCallback onConfirm,
+    bool isDestructive = false,
+  }) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dismissal by tapping outside
+      builder:
+          (context) => WillPopScope(
+            onWillPop: () async => false, // Prevent dismissal by back button
+            child: CustomAlert(
+              title: title,
+              message: message,
+              confirmText: confirmText,
+              onConfirm: onConfirm,
+              isDestructive: isDestructive,
+            ),
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -168,20 +194,20 @@ class _DetailInOrderScreenState extends State<DetailInOrderScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Consumer<ShippingDetailProvider>(
-        builder: (context, provider, _) {
-          if (provider.isLoading) {
+      body: Consumer2<ShippingDetailProvider, ShippingAccept>(
+        builder: (context, shippingDetailProvider, shippingAcceptProvider, _) {
+          if (shippingDetailProvider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (provider.error != null) {
+          if (shippingDetailProvider.error != null) {
             return Center(
               child: Text(
-                provider.error!,
+                shippingDetailProvider.error!,
                 style: const TextStyle(color: Colors.redAccent, fontSize: 16),
               ),
             );
           }
-          final detail = provider.shippingDetail;
+          final detail = shippingDetailProvider.shippingDetail;
           if (detail == null) {
             return const Center(
               child: Text('Data detail pengiriman tidak tersedia.'),
@@ -191,6 +217,40 @@ class _DetailInOrderScreenState extends State<DetailInOrderScreen> {
           final shipping = detail.shipping;
           final transaction = detail.transaction;
           final details = detail.details;
+
+          if (shippingAcceptProvider.errorMessage != null) {
+            final errorMessage = shippingAcceptProvider.errorMessage!;
+            shippingAcceptProvider.errorMessage =
+                null; 
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _showCustomAlert(
+                title: 'Gagal',
+                message: errorMessage,
+                confirmText: 'OK',
+                onConfirm: () {
+                  Navigator.pop(context); 
+                },
+                isDestructive: true,
+              );
+            });
+          } else if (shippingAcceptProvider.successMessage != null) {
+            shippingAcceptProvider.successMessage =
+                null; // Clear to prevent duplicates
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _showCustomAlert(
+                title: 'Berhasil',
+                message: 'Pesanan diterima',
+                confirmText: 'OK',
+                onConfirm: () {
+                  Navigator.pop(context);
+                  Provider.of<ShippingDetailProvider>(
+                    context,
+                    listen: false,
+                  ).loadShippingDetail(widget.transactionId);
+                },
+              );
+            });
+          }
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -219,7 +279,6 @@ class _DetailInOrderScreenState extends State<DetailInOrderScreen> {
                         'Kode Transaksi',
                         transaction.transactionCode,
                       ),
-
                       _infoItem(
                         Icons.shopping_cart,
                         'Jumlah Produk',
@@ -314,14 +373,24 @@ class _DetailInOrderScreenState extends State<DetailInOrderScreen> {
           );
         },
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-        child: CustomButton(
-          text: 'Terima Pesanan',
-          onPressed: () {
-            ScaffoldMessenger.of(context);
-          },
-        ),
+      bottomNavigationBar: Consumer<ShippingAccept>(
+        builder: (context, shippingAcceptProvider, _) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+            child: CustomButton(
+              text: 'Terima Pesanan',
+              isLoading: shippingAcceptProvider.isLoading,
+              onPressed:
+                  shippingAcceptProvider.isLoading
+                      ? null
+                      : () async {
+                        await shippingAcceptProvider.acceptShipping(
+                          widget.transactionId,
+                        );
+                      },
+            ),
+          );
+        },
       ),
     );
   }

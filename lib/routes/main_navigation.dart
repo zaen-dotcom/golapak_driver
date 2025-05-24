@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import '../screens/indelivery_screen.dart';
-import '../screens/inorder_screen.dart';
 import '../screens/profile_screen.dart';
+import '../routes/order_navigation.dart';
 
 class MainNavigation extends StatefulWidget {
-  final int initialIndex; // tambah ini
+  final int initialIndex;
 
   const MainNavigation({Key? key, this.initialIndex = 0}) : super(key: key);
 
@@ -17,7 +17,7 @@ class _MainNavigationState extends State<MainNavigation> {
   late int _selectedIndex;
 
   final List<Widget> _screens = const [
-    InOrderScreen(),
+    OrderNavigation(),
     InDeliveryScreen(),
     ProfileScreen(),
   ];
@@ -39,7 +39,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<BottomNavigationBarItem> _navItems = const [
     BottomNavigationBarItem(
       icon: Icon(Icons.list_alt_outlined),
-      label: 'In Order',
+      label: 'Orders',
     ),
     BottomNavigationBarItem(
       icon: Icon(Icons.delivery_dining_outlined),

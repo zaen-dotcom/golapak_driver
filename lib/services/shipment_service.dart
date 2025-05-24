@@ -48,3 +48,23 @@ Future<ShippingDetailModel> fetchShippingDetail(int transactionId) async {
     throw Exception('Gagal memuat detail pengiriman: ${response.statusCode}');
   }
 }
+
+Future<Map<String, dynamic>> shippingAccept({required int id}) async {
+  final url = Uri.parse('${ApiConfig.baseUrl}/shipping-accept');
+  final token = await TokenManager.getToken();
+
+  final response = await http.patch(
+    url,
+    headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({'id': id}), 
+  );
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body);
+  } else {
+    throw Exception('Gagal mengubah status pengiriman');
+  }
+}
