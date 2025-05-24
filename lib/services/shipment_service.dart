@@ -59,12 +59,35 @@ Future<Map<String, dynamic>> shippingAccept({required int id}) async {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
     },
-    body: jsonEncode({'id': id}), 
+    body: jsonEncode({'id': id}),
   );
 
   if (response.statusCode == 200) {
     return jsonDecode(response.body);
   } else {
     throw Exception('Gagal mengubah status pengiriman');
+  }
+}
+
+Future<List<dynamic>> getProcessingShipments() async {
+  final token = await TokenManager.getToken();
+  final url = Uri.parse('${ApiConfig.baseUrl}/shipping-process');
+
+  final response = await http.get(
+    url,
+    headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+  );
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    if (data['status'] == 'success') {
+      return data['data'] as List<dynamic>;
+    } else {
+      throw Exception(
+        'Gagal memuat data: ${data['message'] ?? 'Unknown error'}',
+      );
+    }
+  } else {
+    throw Exception('Request gagal dengan status: ${response.statusCode}');
   }
 }

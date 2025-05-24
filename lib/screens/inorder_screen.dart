@@ -5,21 +5,25 @@ import '../providers/shipment_provider.dart';
 import '../components/card_order.dart';
 
 class InOrderScreen extends StatefulWidget {
-  const InOrderScreen({super.key});
+  const InOrderScreen({Key? key}) : super(key: key);
 
   @override
-  State<InOrderScreen> createState() => _InOrderScreenState();
+  State<InOrderScreen> createState() => InOrderScreenState();
 }
 
-class _InOrderScreenState extends State<InOrderScreen> {
+class InOrderScreenState extends State<InOrderScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+
+  Future<void> refresh() async {
+    await Provider.of<OrderProvider>(context, listen: false).loadPendingOrders();
+  }
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<OrderProvider>(context, listen: false).loadPendingOrders();
+      refresh();
     });
   }
 
@@ -35,12 +39,7 @@ class _InOrderScreenState extends State<InOrderScreen> {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            16,
-            8,
-            16,
-            8,
-          ), 
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
           child: Column(
             children: [
               Expanded(

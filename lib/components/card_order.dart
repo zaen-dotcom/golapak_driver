@@ -8,7 +8,11 @@ class CardOrder extends StatelessWidget {
   const CardOrder({Key? key, required this.data}) : super(key: key);
 
   String formatCurrency(int amount) {
-    final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
     return formatter.format(amount);
   }
 
@@ -29,6 +33,9 @@ class CardOrder extends StatelessWidget {
         return Colors.green;
       case 'cancelled':
         return Colors.red;
+      case 'process': 
+      case 'processing': 
+        return Colors.blue; 
       default:
         return AppColors.primary;
     }
@@ -58,7 +65,10 @@ class CardOrder extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 6,
+                    horizontal: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: getStatusColor(status).withOpacity(0.15),
                     borderRadius: BorderRadius.circular(20),
@@ -101,11 +111,18 @@ class CardOrder extends StatelessWidget {
 
             Row(
               children: [
-                Icon(Icons.calendar_today_outlined, color: AppColors.primary, size: 18),
+                Icon(
+                  Icons.calendar_today_outlined,
+                  color: AppColors.primary,
+                  size: 18,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   formatDate(transactionDate),
-                  style: const TextStyle(fontSize: 13, color: AppColors.blueGreyText),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.blueGreyText,
+                  ),
                 ),
               ],
             ),
@@ -114,7 +131,11 @@ class CardOrder extends StatelessWidget {
 
             Row(
               children: [
-                Icon(Icons.shopping_cart_outlined, color: AppColors.primary, size: 20),
+                Icon(
+                  Icons.shopping_cart_outlined,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   'Qty: $totalQty',

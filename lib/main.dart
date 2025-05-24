@@ -8,6 +8,7 @@ import 'theme/theme.dart';
 import 'providers/shipment_provider.dart';
 import 'providers/shipping_detail_provider.dart';
 import 'providers/shipping_accept.dart';
+import 'providers/shipping_proccess_provider.dart';
 import 'package:golapak_driver/screens/detail_inorder.dart';
 
 void main() {
@@ -17,6 +18,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => OrderProvider()),
         ChangeNotifierProvider(create: (_) => ShippingDetailProvider()),
         ChangeNotifierProvider(create: (_) => ShippingAccept()),
+        ChangeNotifierProvider(create: (_) => ShipmentProvider()),
       ],
 
       child: const MyApp(),
