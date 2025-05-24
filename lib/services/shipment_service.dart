@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/order_model.dart';
+import '../models/shipping_model.dart';
 import '../services/api_config.dart';
 import '../utils/token_manager.dart';
+import '../models/shipping_detail_model.dart';
 
 Future<List<Order>> fetchPendingOrders() async {
   final token = await TokenManager.getToken();
@@ -28,5 +29,22 @@ Future<List<Order>> fetchPendingOrders() async {
     }
   } else {
     throw Exception('Failed to load orders: ${response.statusCode}');
+  }
+}
+
+Future<ShippingDetailModel> fetchShippingDetail(int transactionId) async {
+  final token = await TokenManager.getToken();
+  final url = Uri.parse('${ApiConfig.baseUrl}/shipping/$transactionId');
+
+  final response = await http.get(
+    url,
+    headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+  );
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    return ShippingDetailModel.fromJson(data['data']);
+  } else {
+    throw Exception('Gagal memuat detail pengiriman: ${response.statusCode}');
   }
 }

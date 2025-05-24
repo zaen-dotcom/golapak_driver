@@ -20,7 +20,6 @@ class _InOrderScreenState extends State<InOrderScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Panggil loadPendingOrders tanpa parameter token
       Provider.of<OrderProvider>(context, listen: false).loadPendingOrders();
     });
   }
@@ -148,7 +147,20 @@ class _InOrderScreenState extends State<InOrderScreen> {
                       itemCount: orderProvider.orders.length,
                       itemBuilder: (context, index) {
                         final order = orderProvider.orders[index];
-                        return CardOrder(data: order.toJson());
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/detail-inorder',
+                              arguments: {
+                                'transactionId':
+                                    order
+                                        .deliveryId, 
+                              },
+                            );
+                          },
+                          child: CardOrder(data: order.toJson()),
+                        );
                       },
                     );
                   },
