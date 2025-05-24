@@ -33,9 +33,9 @@ class CardOrder extends StatelessWidget {
         return Colors.green;
       case 'cancelled':
         return Colors.red;
-      case 'process': 
-      case 'processing': 
-        return Colors.blue; 
+      case 'process':
+      case 'processing':
+        return Colors.blue;
       default:
         return AppColors.primary;
     }
@@ -54,7 +54,7 @@ class CardOrder extends StatelessWidget {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

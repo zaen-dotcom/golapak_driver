@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
+import '../screens/inorder_screen.dart';
 import '../screens/indelivery_screen.dart';
 import '../screens/profile_screen.dart';
-import '../routes/order_navigation.dart';
 
 class MainNavigation extends StatefulWidget {
   final int initialIndex;
@@ -17,7 +17,7 @@ class _MainNavigationState extends State<MainNavigation> {
   late int _selectedIndex;
 
   final List<Widget> _screens = const [
-    OrderNavigation(),
+    InOrderScreen(), 
     InDeliveryScreen(),
     ProfileScreen(),
   ];

@@ -16,7 +16,10 @@ class InOrderScreenState extends State<InOrderScreen> {
   final FocusNode _focusNode = FocusNode();
 
   Future<void> refresh() async {
-    await Provider.of<OrderProvider>(context, listen: false).loadPendingOrders();
+    await Provider.of<OrderProvider>(
+      context,
+      listen: false,
+    ).loadPendingOrders();
   }
 
   @override
@@ -65,22 +68,25 @@ class InOrderScreenState extends State<InOrderScreen> {
                       );
                     }
 
-                    return ListView.builder(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      itemCount: orderProvider.orders.length,
-                      itemBuilder: (context, index) {
-                        final order = orderProvider.orders[index];
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/detail-inorder',
-                              arguments: {'transactionId': order.deliveryId},
-                            );
-                          },
-                          child: CardOrder(data: order.toJson()),
-                        );
-                      },
+                    return RefreshIndicator(
+                      onRefresh: refresh,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        itemCount: orderProvider.orders.length,
+                        itemBuilder: (context, index) {
+                          final order = orderProvider.orders[index];
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                '/detail-inorder',
+                                arguments: {'transactionId': order.deliveryId},
+                              );
+                            },
+                            child: CardOrder(data: order.toJson()),
+                          );
+                        },
+                      ),
                     );
                   },
                 ),
