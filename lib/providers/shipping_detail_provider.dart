@@ -20,7 +20,7 @@ class ShippingDetailProvider with ChangeNotifier {
     try {
       _shippingDetail = await fetchShippingDetail(
         transactionId,
-      ); // <- fungsi global
+      ); 
     } catch (e) {
       _error = 'Terjadi kesalahan: ${e.toString()}';
     }

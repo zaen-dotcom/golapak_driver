@@ -25,8 +25,8 @@ class Shipping {
   final String name;
   final String phoneNumber;
   final String address;
-  final String latitude;
-  final String longitude;
+  final double latitude;
+  final double longitude;
 
   Shipping({
     required this.id,
@@ -44,9 +44,17 @@ class Shipping {
     name: json['name'],
     phoneNumber: json['phone_number'],
     address: json['address'],
-    latitude: json['latitude'],
-    longitude: json['longitude'],
+    latitude: _toDouble(json['latitude']),
+    longitude: _toDouble(json['longitude']),
   );
+
+  static double _toDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0; // fallback aman
+  }
 }
 
 class Transaction {

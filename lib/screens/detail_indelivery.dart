@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../components/box_container.dart';
 import '../providers/shipping_detail_provider.dart';
 import '../theme/colors.dart';
+import '../components/button.dart';
+import 'map_route_screen.dart';
 
 class DetailInDeliveryScreen extends StatefulWidget {
   final int transactionId;
@@ -197,136 +199,173 @@ class _DetailInDeliveryScreenState extends State<DetailInDeliveryScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Consumer<ShippingDetailProvider>(
-        builder: (context, provider, _) {
-          if (provider.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            );
-          }
-          if (provider.error != null) {
-            return Center(
-              child: Text(
-                provider.error!,
-                style: const TextStyle(color: Colors.redAccent, fontSize: 16),
-              ),
-            );
-          }
-          final detail = provider.shippingDetail;
-          if (detail == null) {
-            return const Center(
-              child: Text('Data detail pengiriman tidak tersedia.'),
-            );
-          }
+      body: Stack(
+        children: [
+          // Konten scroll
+          Consumer<ShippingDetailProvider>(
+            builder: (context, provider, _) {
+              if (provider.isLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                );
+              }
+              if (provider.error != null) {
+                return Center(
+                  child: Text(
+                    provider.error!,
+                    style: const TextStyle(
+                      color: Colors.redAccent,
+                      fontSize: 16,
+                    ),
+                  ),
+                );
+              }
+              final detail = provider.shippingDetail;
+              if (detail == null) {
+                return const Center(
+                  child: Text('Data detail pengiriman tidak tersedia.'),
+                );
+              }
 
-          final shipping = detail.shipping;
-          final transaction = detail.transaction;
-          final details = detail.details;
+              final shipping = detail.shipping;
+              final transaction = detail.transaction;
+              final details = detail.details;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                WhiteBoxContainer(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              return SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 140),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    WhiteBoxContainer(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Order #${transaction.transactionCode}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              _statusBadge(transaction.status),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
                           Text(
-                            'Order #${transaction.transactionCode}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                            'Placed on ${transaction.date}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
                             ),
                           ),
-                          _statusBadge(transaction.status),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Placed on ${transaction.date}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
+                    ),
+                    const SizedBox(height: 16),
 
-                _sectionTitle('Delivery Information'),
-                WhiteBoxContainer(
-                  child: Column(
-                    children: [
-                      _infoItem(
-                        'Name',
-                        shipping.name,
-                        icon: Icons.person_outline,
+                    _sectionTitle('Delivery Information'),
+                    WhiteBoxContainer(
+                      child: Column(
+                        children: [
+                          _infoItem(
+                            'Name',
+                            shipping.name,
+                            icon: Icons.person_outline,
+                          ),
+                          const Divider(height: 1, color: Colors.black12),
+                          _infoItem(
+                            'Phone',
+                            shipping.phoneNumber,
+                            icon: Icons.phone_outlined,
+                          ),
+                          const Divider(height: 1, color: Colors.black12),
+                          _infoItem(
+                            'Address',
+                            shipping.address,
+                            icon: Icons.location_on_outlined,
+                          ),
+                        ],
                       ),
-                      const Divider(height: 1, color: Colors.black12),
-                      _infoItem(
-                        'Phone',
-                        shipping.phoneNumber,
-                        icon: Icons.phone_outlined,
-                      ),
-                      const Divider(height: 1, color: Colors.black12),
-                      _infoItem(
-                        'Address',
-                        shipping.address,
-                        icon: Icons.location_on_outlined,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
+                    ),
+                    const SizedBox(height: 12),
 
-                _sectionTitle('Order Summary'),
-                WhiteBoxContainer(
-                  child: Column(
-                    children: [
-                      _infoItem(
-                        'Subtotal',
-                        formatCurrency.format(
-                          transaction.grandTotal - transaction.deliveryFee,
-                        ),
-                      ),
-                      const Divider(height: 1, color: Colors.black12),
-                      _infoItem(
-                        'Delivery Fee',
-                        formatCurrency.format(transaction.deliveryFee),
-                      ),
-                      const Divider(height: 1, color: Colors.black12),
-                      _infoItem(
-                        'Total',
-                        formatCurrency.format(transaction.grandTotal),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
+                    CustomButton(
+                      text: 'Tampilkan Rute',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => MapRouteScreen(
+                                  destinationLat: shipping.latitude,
+                                  destinationLng: shipping.longitude,
+                                ),
+                          ),
+                        );
+                      },
+                    ),
 
-                _sectionTitle('Products (${details.length})'),
-                Column(
-                  children:
-                      details
-                          .map(
-                            (product) => _productItem(
-                              product.name,
-                              product.qty,
-                              product.mainSubtotal,
+                    const SizedBox(height: 24),
+
+                    _sectionTitle('Order Summary'),
+                    WhiteBoxContainer(
+                      child: Column(
+                        children: [
+                          _infoItem(
+                            'Subtotal',
+                            formatCurrency.format(
+                              transaction.grandTotal - transaction.deliveryFee,
                             ),
-                          )
-                          .toList(),
+                          ),
+                          const Divider(height: 1, color: Colors.black12),
+                          _infoItem(
+                            'Delivery Fee',
+                            formatCurrency.format(transaction.deliveryFee),
+                          ),
+                          const Divider(height: 1, color: Colors.black12),
+                          _infoItem(
+                            'Total',
+                            formatCurrency.format(transaction.grandTotal),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    _sectionTitle('Products (${details.length})'),
+                    Column(
+                      children:
+                          details
+                              .map(
+                                (product) => _productItem(
+                                  product.name,
+                                  product.qty,
+                                  product.mainSubtotal,
+                                ),
+                              )
+                              .toList(),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 80),
-              ],
+              );
+            },
+          ),
+
+          Positioned(
+            bottom: 50,
+            left: 16,
+            right: 16,
+            child: CustomButton(
+              text: 'Pesanan Selesai Diantar',
+              onPressed: () {
+                print('Konfirmasi pesanan selesai');
+              },
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
