@@ -9,6 +9,7 @@ import 'providers/shipment_provider.dart';
 import 'providers/shipping_detail_provider.dart';
 import 'providers/shipping_accept.dart';
 import 'providers/shipping_proccess_provider.dart';
+import 'screens/detail_indelivery.dart';
 import 'package:golapak_driver/screens/detail_inorder.dart';
 
 void main() {
@@ -39,13 +40,27 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
-        '/main': (context) => const MainNavigation(),
+        '/main': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments;
+          int initialIndex = 0;
+          if (args is int) {
+            initialIndex = args;
+          }
+          return MainNavigation(initialIndex: initialIndex);
+        },
         '/detail-inorder': (context) {
           final args =
               ModalRoute.of(context)!.settings.arguments
                   as Map<String, dynamic>;
           final transactionId = args['transactionId'] as int;
           return DetailInOrderScreen(transactionId: transactionId);
+        },
+                '/detail-indelivery': (context) {
+          final args =
+              ModalRoute.of(context)!.settings.arguments
+                  as Map<String, dynamic>;
+          final transactionId = args['transactionId'] as int;
+          return DetailInDeliveryScreen(transactionId: transactionId);
         },
       },
     );

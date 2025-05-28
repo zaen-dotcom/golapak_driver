@@ -2,22 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../components/box_container.dart';
-import '../components/button.dart';
 import '../providers/shipping_detail_provider.dart';
-import '../providers/shipping_accept.dart';
 import '../theme/colors.dart';
-import '../components/alertdialog.dart';
 
-class DetailInOrderScreen extends StatefulWidget {
+class DetailInDeliveryScreen extends StatefulWidget {
   final int transactionId;
 
-  const DetailInOrderScreen({super.key, required this.transactionId});
+  const DetailInDeliveryScreen({super.key, required this.transactionId});
 
   @override
-  State<DetailInOrderScreen> createState() => _DetailInOrderScreenState();
+  State<DetailInDeliveryScreen> createState() => _DetailInDeliveryScreenState();
 }
 
-class _DetailInOrderScreenState extends State<DetailInOrderScreen> {
+class _DetailInDeliveryScreenState extends State<DetailInDeliveryScreen> {
   final formatCurrency = NumberFormat.currency(
     locale: 'id_ID',
     symbol: 'Rp',
@@ -33,6 +30,23 @@ class _DetailInOrderScreenState extends State<DetailInOrderScreen> {
         listen: false,
       ).loadShippingDetail(widget.transactionId);
     });
+  }
+
+  Color _statusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return const Color(0xFFFFC107);
+      case 'cooking':
+        return const Color(0xFFFF7043);
+      case 'on_delivery':
+        return const Color(0xFF42A5F5);
+      case 'completed':
+        return const Color(0xFF4CAF50);
+      case 'cancelled':
+        return const Color(0xFFE57373);
+      default:
+        return Colors.grey.shade400;
+    }
   }
 
   Widget _sectionTitle(String text) => Padding(
@@ -138,29 +152,25 @@ class _DetailInOrderScreenState extends State<DetailInOrderScreen> {
     ),
   );
 
-  void _showCustomAlert({
-    required String title,
-    required String message,
-    required String confirmText,
-    required VoidCallback onConfirm,
-    bool isDestructive = false,
-  }) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder:
-          (context) => WillPopScope(
-            onWillPop: () async => false,
-            child: CustomAlert(
-              title: title,
-              message: message,
-              confirmText: confirmText,
-              onConfirm: onConfirm,
-              isDestructive: isDestructive,
-            ),
-          ),
-    );
-  }
+  Widget _statusBadge(String status) => Container(
+    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+    decoration: BoxDecoration(
+      color: _statusColor(status).withOpacity(0.1),
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(
+        color: _statusColor(status).withOpacity(0.3),
+        width: 1,
+      ),
+    ),
+    child: Text(
+      status.toUpperCase(),
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 12,
+        color: _statusColor(status),
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +181,7 @@ class _DetailInOrderScreenState extends State<DetailInOrderScreen> {
         elevation: 0.5,
         centerTitle: true,
         title: const Text(
-          'Detail Order',
+          'Detail Delivery',
           style: TextStyle(
             color: Colors.black87,
             fontSize: 18,
@@ -187,22 +197,22 @@ class _DetailInOrderScreenState extends State<DetailInOrderScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Consumer2<ShippingDetailProvider, ShippingAccept>(
-        builder: (context, shippingDetailProvider, shippingAcceptProvider, _) {
-          if (shippingDetailProvider.isLoading) {
+      body: Consumer<ShippingDetailProvider>(
+        builder: (context, provider, _) {
+          if (provider.isLoading) {
             return const Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             );
           }
-          if (shippingDetailProvider.error != null) {
+          if (provider.error != null) {
             return Center(
               child: Text(
-                shippingDetailProvider.error!,
+                provider.error!,
                 style: const TextStyle(color: Colors.redAccent, fontSize: 16),
               ),
             );
           }
-          final detail = shippingDetailProvider.shippingDetail;
+          final detail = provider.shippingDetail;
           if (detail == null) {
             return const Center(
               child: Text('Data detail pengiriman tidak tersedia.'),
@@ -213,57 +223,28 @@ class _DetailInOrderScreenState extends State<DetailInOrderScreen> {
           final transaction = detail.transaction;
           final details = detail.details;
 
-          if (shippingAcceptProvider.errorMessage != null) {
-            final errorMessage = shippingAcceptProvider.errorMessage!;
-            shippingAcceptProvider.errorMessage = null;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _showCustomAlert(
-                title: 'Gagal',
-                message: errorMessage,
-                confirmText: 'OK',
-                onConfirm: () {
-                  Navigator.pop(context);
-                },
-                isDestructive: true,
-              );
-            });
-          } else if (shippingAcceptProvider.successMessage != null) {
-            shippingAcceptProvider.successMessage = null;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _showCustomAlert(
-                title: 'Antar Pesanan',
-                message: 'Pesanan siap diantar, kunjungi tab Delivery.',
-                confirmText: 'OK',
-                onConfirm: () {
-                  Navigator.pop(context);
-                  Navigator.pushReplacementNamed(
-                    context,
-                    '/main',
-                    arguments: 1,
-                  );
-                },
-              );
-            });
-          }
-
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Order Header
                 WhiteBoxContainer(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Order #${transaction.transactionCode}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Order #${transaction.transactionCode}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          _statusBadge(transaction.status),
+                        ],
                       ),
-
                       const SizedBox(height: 8),
                       Text(
                         'Placed on ${transaction.date}',
@@ -277,7 +258,6 @@ class _DetailInOrderScreenState extends State<DetailInOrderScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Delivery Information
                 _sectionTitle('Delivery Information'),
                 WhiteBoxContainer(
                   child: Column(
@@ -304,7 +284,6 @@ class _DetailInOrderScreenState extends State<DetailInOrderScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Order Summary
                 _sectionTitle('Order Summary'),
                 WhiteBoxContainer(
                   child: Column(
@@ -330,7 +309,6 @@ class _DetailInOrderScreenState extends State<DetailInOrderScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Products
                 _sectionTitle('Products (${details.length})'),
                 Column(
                   children:
@@ -349,27 +327,6 @@ class _DetailInOrderScreenState extends State<DetailInOrderScreen> {
             ),
           );
         },
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-          child: Consumer<ShippingAccept>(
-            builder: (context, shippingAcceptProvider, _) {
-              return CustomButton(
-                text: 'Antar Pesanan',
-                onPressed:
-                    shippingAcceptProvider.isLoading
-                        ? null
-                        : () async {
-                          await shippingAcceptProvider.acceptShipping(
-                            widget.transactionId,
-                          );
-                        },
-                isLoading: shippingAcceptProvider.isLoading,
-              );
-            },
-          ),
-        ),
       ),
     );
   }

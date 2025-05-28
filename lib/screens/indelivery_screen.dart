@@ -56,7 +56,30 @@ class InDeliveryScreenState extends State<InDeliveryScreen> {
                   itemCount: provider.shipments.length,
                   itemBuilder: (context, index) {
                     final shipment = provider.shipments[index];
-                    return CardOrder(data: shipment.toJson());
+
+                    final dynamic rawDeliveryId = shipment.deliveryId;
+                    final int? deliveryId =
+                        (rawDeliveryId is int)
+                            ? rawDeliveryId
+                            : (int.tryParse(rawDeliveryId?.toString() ?? ''));
+
+                    if (deliveryId == null) {
+                      return CardOrder(data: shipment.toJson());
+                    }
+
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/detail-indelivery',
+                          arguments: {
+                            'transactionId':
+                                deliveryId, 
+                          },
+                        );
+                      },
+                      child: CardOrder(data: shipment.toJson()),
+                    );
                   },
                 ),
               );
