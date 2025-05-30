@@ -21,12 +21,12 @@ class Shipment {
 
   factory Shipment.fromJson(Map<String, dynamic> json) {
     return Shipment(
-      deliveryId: json['delivery_id'],
+      deliveryId: int.tryParse(json['delivery_id'].toString()) ?? 0,
       status: json['status'],
       transactionCode: json['transaction_code'],
-      totalQty: json['total_qty'],
-      deliveryFee: json['delivery_fee'],
-      grandTotal: json['grand_total'],
+      totalQty: int.tryParse(json['total_qty'].toString()) ?? 0,
+      deliveryFee: int.tryParse(json['delivery_fee'].toString()) ?? 0,
+      grandTotal: int.tryParse(json['grand_total'].toString()) ?? 0,
       transactionDate: json['transaction_date'],
       customerName: json['customer_name'],
     );

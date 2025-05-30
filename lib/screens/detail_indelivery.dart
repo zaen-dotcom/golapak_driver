@@ -6,6 +6,9 @@ import '../providers/shipping_detail_provider.dart';
 import '../theme/colors.dart';
 import '../components/button.dart';
 import 'map_route_screen.dart';
+import '../services/shipment_service.dart';
+import '../components/alertdialog.dart';
+import '../routes/main_navigation.dart';
 
 class DetailInDeliveryScreen extends StatefulWidget {
   final int transactionId;
@@ -34,6 +37,52 @@ class _DetailInDeliveryScreenState extends State<DetailInDeliveryScreen> {
     });
   }
 
+  Future<void> _handleShippingDone(String transactionCode) async {
+    try {
+      await markShippingAsDone(transactionCode);
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder:
+              (_) => CustomAlert(
+                title: 'Selesai',
+                message: 'Pesanan selesai di antarkan.',
+                confirmText: 'OK',
+                onConfirm: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (_) => MainNavigation(initialIndex: 1),
+                    ),
+                    (route) => false,
+                  );
+                },
+              ),
+        );
+      }
+    } catch (e) {
+      _showErrorDialog('Gagal menyelesaikan pengiriman: ${e.toString()}');
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder:
+          (_) => AlertDialog(
+            title: const Text('Gagal'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+    );
+  }
+
   Color _statusColor(String status) {
     switch (status.toLowerCase()) {
       case 'pending':
@@ -42,7 +91,7 @@ class _DetailInDeliveryScreenState extends State<DetailInDeliveryScreen> {
         return const Color(0xFFFF7043);
       case 'on_delivery':
         return const Color(0xFF42A5F5);
-      case 'completed':
+      case 'done':
         return const Color(0xFF4CAF50);
       case 'cancelled':
         return const Color(0xFFE57373);
@@ -361,7 +410,17 @@ class _DetailInDeliveryScreenState extends State<DetailInDeliveryScreen> {
             child: CustomButton(
               text: 'Pesanan Selesai Diantar',
               onPressed: () {
-                print('Konfirmasi pesanan selesai');
+                final provider = Provider.of<ShippingDetailProvider>(
+                  context,
+                  listen: false,
+                );
+                final transactionCode =
+                    provider.shippingDetail?.transaction.transactionCode;
+                if (transactionCode != null) {
+                  _handleShippingDone(transactionCode);
+                } else {
+                  _showErrorDialog('Kode transaksi tidak ditemukan.');
+                }
               },
             ),
           ),

@@ -29,7 +29,7 @@ class CardOrder extends StatelessWidget {
     switch (status.toLowerCase()) {
       case 'pending':
         return Colors.orange;
-      case 'delivered':
+      case 'done':
         return Colors.green;
       case 'cancelled':
         return Colors.red;

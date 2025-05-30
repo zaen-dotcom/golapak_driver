@@ -91,3 +91,31 @@ Future<List<dynamic>> getProcessingShipments() async {
     throw Exception('Request gagal dengan status: ${response.statusCode}');
   }
 }
+
+Future<void> markShippingAsDone(String transactionCode) async {
+  final token = await TokenManager.getToken();
+  if (token == null) {
+    throw Exception('Token tidak ditemukan, user belum login');
+  }
+
+  final url = Uri.parse('${ApiConfig.baseUrl}/shipping-done');
+
+  final response = await http.patch(
+    url,
+    headers: {
+      'Authorization': 'Bearer $token',
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({'transaction_code': transactionCode}),
+  );
+
+  if (response.statusCode == 200) {
+    final responseData = json.decode(response.body);
+    if (responseData['status'] != 'success') {
+      throw Exception('Gagal mengubah status: ${responseData['message']}');
+    }
+  } else {
+    throw Exception('Request gagal dengan status: ${response.statusCode}');
+  }
+}

@@ -39,8 +39,8 @@ class Shipping {
   });
 
   factory Shipping.fromJson(Map<String, dynamic> json) => Shipping(
-    id: json['id'],
-    transactionId: json['transaction_id'],
+    id: int.tryParse(json['id'].toString()) ?? 0,
+    transactionId: int.tryParse(json['transaction_id'].toString()) ?? 0,
     name: json['name'],
     phoneNumber: json['phone_number'],
     address: json['address'],
@@ -53,7 +53,7 @@ class Shipping {
     if (value is double) return value;
     if (value is int) return value.toDouble();
     if (value is String) return double.tryParse(value) ?? 0.0;
-    return 0.0; // fallback aman
+    return 0.0;
   }
 }
 
@@ -79,12 +79,12 @@ class Transaction {
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) => Transaction(
-    id: json['id'],
+    id: int.tryParse(json['id'].toString()) ?? 0,
     transactionCode: json['transaction_code'],
-    totalQty: json['total_qty'],
-    totalMainCost: json['total_main_cost'],
-    deliveryFee: json['delivery_fee'],
-    grandTotal: json['grand_total'],
+    totalQty: int.tryParse(json['total_qty'].toString()) ?? 0,
+    totalMainCost: int.tryParse(json['total_main_cost'].toString()) ?? 0,
+    deliveryFee: int.tryParse(json['delivery_fee'].toString()) ?? 0,
+    grandTotal: int.tryParse(json['grand_total'].toString()) ?? 0,
     date: json['date'],
     status: json['status'],
   );
@@ -106,10 +106,10 @@ class Detail {
   });
 
   factory Detail.fromJson(Map<String, dynamic> json) => Detail(
-    id: json['id'],
+    id: int.tryParse(json['id'].toString()) ?? 0,
     name: json['name'],
-    qty: json['qty'],
-    mainCost: json['main_cost'],
-    mainSubtotal: json['main_subtotal'],
+    qty: int.tryParse(json['qty'].toString()) ?? 0,
+    mainCost: int.tryParse(json['main_cost'].toString()) ?? 0,
+    mainSubtotal: int.tryParse(json['main_subtotal'].toString()) ?? 0,
   );
 }
