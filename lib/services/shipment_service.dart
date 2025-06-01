@@ -21,7 +21,10 @@ Future<List<Order>> fetchPendingOrders() async {
 
   final response = await http.get(
     url,
-    headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    headers: {
+      'Authorization': 'Bearer $token',
+      'Accept': 'application/json',
+    },
   );
 
   print('[PENDING ORDER] STATUS CODE: ${response.statusCode}');
@@ -39,14 +42,13 @@ Future<List<Order>> fetchPendingOrders() async {
     }
   } else if (response.statusCode == 401) {
     print('[PENDING ORDER] ❌ Token tidak valid / expired');
-    throw Exception(
-      'Unauthenticated: Sesi Anda telah habis, silakan login kembali.',
-    );
+    throw Exception('Unauthenticated: Sesi Anda telah habis, silakan login kembali.');
   } else {
     print('[PENDING ORDER] ❌ Gagal memuat data: ${response.statusCode}');
     throw Exception('Gagal memuat data: ${response.statusCode}');
   }
 }
+
 
 Future<ShippingDetailModel> fetchShippingDetail(int transactionId) async {
   final token = await TokenManager.getToken();
