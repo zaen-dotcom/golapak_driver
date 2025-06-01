@@ -21,6 +21,8 @@ class OrderProvider extends ChangeNotifier {
       _orders = await fetchPendingOrders();
     } catch (e) {
       _error = e.toString();
+      notifyListeners();
+      rethrow;
     } finally {
       _loading = false;
       notifyListeners();

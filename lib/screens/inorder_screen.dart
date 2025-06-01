@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import '../theme/colors.dart';
 import '../providers/shipment_provider.dart';
 import '../components/card_order.dart';
+import '../components/alertdialog.dart';
+import '../screens/login_screen.dart';
+import '../utils/token_manager.dart';
 
 class InOrderScreen extends StatefulWidget {
   const InOrderScreen({Key? key}) : super(key: key);
@@ -16,10 +19,38 @@ class InOrderScreenState extends State<InOrderScreen> {
   final FocusNode _focusNode = FocusNode();
 
   Future<void> refresh() async {
-    await Provider.of<OrderProvider>(
-      context,
-      listen: false,
-    ).loadPendingOrders();
+    try {
+      await Provider.of<OrderProvider>(
+        context,
+        listen: false,
+      ).loadPendingOrders();
+    } catch (e) {
+      print('ERROR DARI REFRESH: $e');
+
+      if (e.toString().contains('401') ||
+          e.toString().toLowerCase().contains('unauthenticated')) {
+        Future.delayed(Duration.zero, () {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder:
+                (_) => CustomAlert(
+                  title: 'Sesi Berakhir',
+                  message: 'Sesi Anda telah berakhir, silakan login kembali.',
+                  confirmText: 'Login',
+                  onConfirm: () async {
+                    Navigator.of(context).pop();
+                    await TokenManager.removeToken(); 
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      (route) => false,
+                    );
+                  },
+                ),
+          );
+        });
+      }
+    }
   }
 
   @override

@@ -341,8 +341,7 @@ class _DetailInDeliveryScreenState extends State<DetailInDeliveryScreen> {
                     ),
                     const SizedBox(height: 12),
 
-                    CustomButton(
-                      text: 'Tampilkan Rute',
+                    TextButton.icon(
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -355,6 +354,21 @@ class _DetailInDeliveryScreenState extends State<DetailInDeliveryScreen> {
                           ),
                         );
                       },
+                      icon: const Icon(
+                        Icons.map_outlined,
+                        color: AppColors.primary,
+                      ),
+                      label: const Text(
+                        'Lihat Lokasi di Peta',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        alignment: Alignment.centerLeft,
+                      ),
                     ),
 
                     const SizedBox(height: 24),
