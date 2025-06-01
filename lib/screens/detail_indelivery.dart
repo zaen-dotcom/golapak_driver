@@ -313,7 +313,7 @@ class _DetailInDeliveryScreenState extends State<DetailInDeliveryScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 10),
 
                     _sectionTitle('Delivery Information'),
                     WhiteBoxContainer(
@@ -339,40 +339,41 @@ class _DetailInDeliveryScreenState extends State<DetailInDeliveryScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 12),
-
-                    TextButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (_) => MapRouteScreen(
-                                  destinationLat: shipping.latitude,
-                                  destinationLng: shipping.longitude,
-                                ),
-                          ),
-                        );
-                      },
-                      icon: const Icon(
-                        Icons.map_outlined,
-                        color: AppColors.primary,
-                      ),
-                      label: const Text(
-                        'Lihat Lokasi di Peta',
-                        style: TextStyle(
+                    Center(
+                      child: TextButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => MapRouteScreen(
+                                    destinationLat: shipping.latitude,
+                                    destinationLng: shipping.longitude,
+                                  ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.map_outlined,
                           color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
                         ),
-                      ),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        alignment: Alignment.centerLeft,
+                        label: const Text(
+                          'Lihat Lokasi di Peta',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 16,
+                          ),
+                        ),
                       ),
                     ),
 
-                    const SizedBox(height: 24),
-
+                    const SizedBox(height: 10),
                     _sectionTitle('Order Summary'),
                     WhiteBoxContainer(
                       child: Column(
@@ -396,7 +397,7 @@ class _DetailInDeliveryScreenState extends State<DetailInDeliveryScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 10),
 
                     _sectionTitle('Products (${details.length})'),
                     Column(
