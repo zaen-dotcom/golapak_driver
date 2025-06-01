@@ -38,6 +38,24 @@ class _DetailInDeliveryScreenState extends State<DetailInDeliveryScreen> {
   }
 
   Future<void> _handleShippingDone(String transactionCode) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (_) => CustomAlert(
+            title: 'Konfirmasi',
+            message: 'Anda yakin pesanan telah ini di antar?',
+            confirmText: 'Ya',
+            cancelText: 'Batal',
+            onConfirm: () => Navigator.of(context).pop(true),
+            onCancel: () => Navigator.of(context).pop(false),
+          ),
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
     try {
       await markShippingAsDone(transactionCode);
       if (mounted) {

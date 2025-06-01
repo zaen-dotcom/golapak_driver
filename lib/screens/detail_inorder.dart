@@ -361,9 +361,28 @@ class _DetailInOrderScreenState extends State<DetailInOrderScreen> {
                     shippingAcceptProvider.isLoading
                         ? null
                         : () async {
-                          await shippingAcceptProvider.acceptShipping(
-                            widget.transactionId,
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            barrierDismissible: false,
+                            builder:
+                                (_) => CustomAlert(
+                                  title: 'Konfirmasi',
+                                  message:
+                                      'Apakah Anda yakin ingin mengantar pesanan ini?',
+                                  confirmText: 'Ya',
+                                  cancelText: 'Batal',
+                                  onConfirm:
+                                      () => Navigator.of(context).pop(true),
+                                  onCancel:
+                                      () => Navigator.of(context).pop(false),
+                                ),
                           );
+
+                          if (confirm == true) {
+                            await shippingAcceptProvider.acceptShipping(
+                              widget.transactionId,
+                            );
+                          }
                         },
                 isLoading: shippingAcceptProvider.isLoading,
               );

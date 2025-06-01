@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher_string.dart'; // Ganti ke launcher_string
+
 import '../components/button.dart';
 import '../components/text_field.dart';
 import '../theme/colors.dart';
@@ -21,6 +23,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _isLoading = false;
 
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   void _showCustomAlert(String title, String message) {
     showDialog(
       context: context,
@@ -35,51 +44,67 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-void _handleLogin() async {
-  if (_isLoading) return;
-
-  setState(() => _isLoading = true);
-
-  final email = _emailController.text.trim();
-  final password = _passwordController.text;
-
-  if (email.isEmpty || password.isEmpty) {
-    setState(() => _isLoading = false);
-    _showCustomAlert("Gagal", "Email dan Password tidak boleh kosong.");
-    return;
-  }
-
-  debugPrint("Memulai proses login...");
-  debugPrint("Email: $email");
-  debugPrint("Password: ${'*' * password.length}");
-
-  final response = await loginKurir(email, password);
-
-  debugPrint("Response dari login API: $response");
-
-  setState(() => _isLoading = false);
-
-  if (response['success'] == true) {
-    final token = response['access_token'];
-    debugPrint("Status sukses. Token: $token");
-
-    if (token != null && token is String) {
-      await TokenManager.saveToken(token);
-      debugPrint("Token berhasil disimpan.");
-      Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
-    } else {
-      debugPrint("Token tidak ditemukan dalam respons.");
-      _showCustomAlert("Gagal", "Token tidak ditemukan.");
-    }
-  } else {
-    debugPrint("Login gagal: ${response['message']}");
-    _showCustomAlert(
-      "Login Gagal",
-      response['message'] ?? "Terjadi kesalahan.",
+  void _launchWhatsApp() async {
+    final phone = '6282139512292';
+    final message = Uri.encodeComponent(
+      'Halo Admin, saya butuh bantuan login.',
     );
-  }
-}
+    final url = 'https://wa.me/$phone?text=$message';
 
+    final success = await launchUrlString(
+      url,
+      mode: LaunchMode.externalApplication,
+    );
+
+    if (!success) {
+      _showCustomAlert(
+        "Gagal",
+        "Tidak dapat membuka WhatsApp di perangkat ini.",
+      );
+    }
+  }
+
+  void _handleLogin() async {
+    if (_isLoading) return;
+
+    setState(() => _isLoading = true);
+
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _showCustomAlert("Gagal", "Email dan Password tidak boleh kosong.");
+      }
+      return;
+    }
+
+    debugPrint("Memulai proses login...");
+    final response = await loginKurir(email, password);
+    debugPrint("Response dari login API: $response");
+
+    if (!mounted) return;
+
+    setState(() => _isLoading = false);
+
+    if (response['success'] == true) {
+      final token = response['access_token'];
+      if (token != null && token is String) {
+        await TokenManager.saveToken(token);
+        if (mounted) {
+          Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
+        }
+      } else {
+        _showCustomAlert("Gagal", "Token tidak ditemukan.");
+      }
+    } else {
+      _showCustomAlert(
+        "Login Gagal",
+        response['message'] ?? "Terjadi kesalahan.",
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,9 +123,9 @@ void _handleLogin() async {
                 ),
               ),
               alignment: Alignment.center,
-              child: Column(
+              child: const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   SizedBox(height: 50),
                   Text(
                     "Log In Driver",
@@ -145,19 +170,16 @@ void _handleLogin() async {
                       children: [
                         const TextSpan(
                           text: 'Ada kendala login? ',
-                          style: TextStyle(fontSize: 12, color: Colors.black87),
+                          style: TextStyle(fontSize: 12),
                         ),
                         TextSpan(
                           text: 'Hubungi Admin',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             color: AppColors.primary,
                           ),
                           recognizer:
-                              TapGestureRecognizer()
-                                ..onTap = () {
-                                  debugPrint('Hubungi Admin diklik');
-                                },
+                              TapGestureRecognizer()..onTap = _launchWhatsApp,
                         ),
                       ],
                     ),
