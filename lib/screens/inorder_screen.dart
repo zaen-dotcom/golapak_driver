@@ -40,7 +40,7 @@ class InOrderScreenState extends State<InOrderScreen> {
                   confirmText: 'Login',
                   onConfirm: () async {
                     Navigator.of(context).pop();
-                    await TokenManager.removeToken(); 
+                    await TokenManager.removeToken();
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(builder: (_) => const LoginScreen()),
                       (route) => false,
